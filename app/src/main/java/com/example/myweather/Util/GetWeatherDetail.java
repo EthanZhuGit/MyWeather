@@ -25,14 +25,15 @@ public class GetWeatherDetail {
 
     /**
      * 通过天气API获取JSON格式天气数据
+     *
      * @param cityId 城市id
      */
-    public static  void requestWeather(String cityId, final HttpCallBackListener listner) {
-        final String address="https://free-api.heweather.com/v5/now?city="+cityId+"&key=c603b45f070741998d0f6e8306e9c61a";
+    public static void requestWeather(String cityId, final HttpCallBackListener listner) {
+        final String address = "https://free-api.heweather.com/v5/now?city=" + cityId + "&key=c603b45f070741998d0f6e8306e9c61a";
         new Thread(new Runnable() {
             @Override
             public void run() {
-                HttpURLConnection connection=null;
+                HttpURLConnection connection = null;
                 try {
                     URL url = new URL(address);
                     connection = (HttpURLConnection) url.openConnection();
@@ -46,8 +47,8 @@ public class GetWeatherDetail {
                     while ((line = reader.readLine()) != null) {
                         sb.append(line);
                     }
-                    String response=sb.toString();
-                    Log.d(TAG, "run: "+response);
+                    String response = sb.toString();
+                    Log.d(TAG, "run: " + response);
 
                     if (listner != null) {
                         listner.onFinish(response);
@@ -66,8 +67,7 @@ public class GetWeatherDetail {
     }
 
 
-
-    public interface HttpCallBackListener{
+    public interface HttpCallBackListener {
         void onFinish(String response);
 
         void onError(Exception e);
@@ -76,24 +76,25 @@ public class GetWeatherDetail {
 
     /**
      * 解析天气数据并存入WeatherDetail表
+     *
      * @param response Json字符串
      */
-    public static void handleWeatherResponse(WeatherDB weatherDB,String response){
+    public static void handleWeatherResponse(WeatherDB weatherDB, String response) {
         try {
-            Gson gson=new Gson();
-            WeatherDetail weatherDetail = gson.fromJson(response,WeatherDetail.class);
+            Gson gson = new Gson();
+            WeatherDetail weatherDetail = gson.fromJson(response, WeatherDetail.class);
             WeatherDetail.HeWeather5Bean heWeather5Bean = weatherDetail.getHeWeather5().get(0);
-            String cityId=heWeather5Bean.getBasic().getId();
-            String cityZh=heWeather5Bean.getBasic().getCity();
-            String updateTime=heWeather5Bean.getBasic().getUpdate().getLoc();
-            String condCode=heWeather5Bean.getNow().getCond().getCode();
-            String condTxt=heWeather5Bean.getNow().getCond().getTxt();
-            String tmp=heWeather5Bean.getNow().getTmp();
-            String fl=heWeather5Bean.getNow().getFl();
-            String dir=heWeather5Bean.getNow().getWind().getDir();
-            String sc=heWeather5Bean.getNow().getWind().getSc();
-            weatherDB.saveWeather(cityId,cityZh,updateTime,condCode,condTxt,tmp,fl,dir,sc);
-            Log.d(TAG, "handleWeatherResponse: "+"saveWeather");
+            String cityId = heWeather5Bean.getBasic().getId();
+            String cityZh = heWeather5Bean.getBasic().getCity();
+            String updateTime = heWeather5Bean.getBasic().getUpdate().getLoc();
+            String condCode = heWeather5Bean.getNow().getCond().getCode();
+            String condTxt = heWeather5Bean.getNow().getCond().getTxt();
+            String tmp = heWeather5Bean.getNow().getTmp();
+            String fl = heWeather5Bean.getNow().getFl();
+            String dir = heWeather5Bean.getNow().getWind().getDir();
+            String sc = heWeather5Bean.getNow().getWind().getSc();
+            weatherDB.saveWeather(cityId, cityZh, updateTime, condCode, condTxt, tmp, fl, dir, sc);
+            Log.d(TAG, "handleWeatherResponse: " + "saveWeather");
         } catch (Exception e) {
             e.printStackTrace();
         }

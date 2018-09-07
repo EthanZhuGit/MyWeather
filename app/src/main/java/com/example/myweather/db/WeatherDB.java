@@ -29,27 +29,25 @@ public class WeatherDB {
     //public static final int VERSION=1;
     private static WeatherDB WeatherDB;
     private SQLiteDatabase db;
+
     /**
      * 将构造方法私有化
      */
-    private WeatherDB(Context context){
+    private WeatherDB(Context context) {
 
         db = openDatabase(context);
     }
 
     private SQLiteDatabase openDatabase(Context context) {
-        String pathFile="data/data/com.example.myweather/databases/MyWeather.db";
-        String pathDir="data/data/com.example.myweather/databases";
+        String pathFile = "data/data/com.example.myweather/databases/MyWeather.db";
+        String pathDir = "data/data/com.example.myweather/databases";
         SQLiteDatabase db;
         File databaseFile = new File(pathFile);
         if (!databaseFile.exists()) {
             File path1 = new File(pathDir);
-            if(path1.mkdir())
-            {
+            if (path1.mkdir()) {
                 System.out.println("创建成功");
-            }
-            else
-            {
+            } else {
                 System.out.println("创建失败");
             }
             BufferedInputStream bis = null;
@@ -59,26 +57,22 @@ public class WeatherDB {
                 bos = new BufferedOutputStream(new FileOutputStream(pathFile));
                 int len;
                 byte[] b = new byte[1024];
-                while((len = bis.read(b)) != -1)
-                {
+                while ((len = bis.read(b)) != -1) {
                     bos.write(b, 0, len);
                     bos.flush();
                 }
-            }  catch (IOException e) {
+            } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-            }finally
-            {
-                if(bis != null)
-                {
+            } finally {
+                if (bis != null) {
                     try {
                         bis.close();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
-                if(bos != null)
-                {
+                if (bos != null) {
                     try {
                         bos.close();
                     } catch (IOException e) {
@@ -91,43 +85,44 @@ public class WeatherDB {
         return db;
 
     }
+
     /**
      * 获取CoolWeatherDB的实例
      */
-    public synchronized static WeatherDB getInstance(Context context){
-        if(WeatherDB==null){
-            WeatherDB=new WeatherDB(context);
+    public synchronized static WeatherDB getInstance(Context context) {
+        if (WeatherDB == null) {
+            WeatherDB = new WeatherDB(context);
         }
         return WeatherDB;
     }
 
-    public void saveWeather(String cityId,String cityZh,String updateTime,String condCode,String condTxt,String tmp,String fl,String dir,String sc) {
+    public void saveWeather(String cityId, String cityZh, String updateTime, String condCode, String condTxt, String tmp, String fl, String dir, String sc) {
         ContentValues values = new ContentValues();
-        values.put("_id",cityId);
-        values.put("cityZh",cityZh);
-        values.put("updateTime",updateTime);
-        values.put("condCode",condCode);
-        values.put("condTxt",condTxt);
-        values.put("tmp",tmp);
-        values.put("fl",fl);
-        values.put("dir",dir);
-        values.put("sc",sc);
+        values.put("_id", cityId);
+        values.put("cityZh", cityZh);
+        values.put("updateTime", updateTime);
+        values.put("condCode", condCode);
+        values.put("condTxt", condTxt);
+        values.put("tmp", tmp);
+        values.put("fl", fl);
+        values.put("dir", dir);
+        values.put("sc", sc);
         /**if((db.rawQuery("select * from WeatherDetail where _id='" + cityId+"'",null).getCount()==0)){
-            db.insert("WeatherDetail", null, values);
-            Log.d("insert", "saveWeather: "+cityId+cityZh+condTxt);
-        }else {
-            db.update("WeatherDetail", values, "updateTime=? and condCode=? and condTxt=? and tmp=?", new String[]{updateTime, condCode, condTxt, tmp});
-            Log.d("update", "saveWeather: "+cityId+cityZh+condTxt);
-        }
+         db.insert("WeatherDetail", null, values);
+         Log.d("insert", "saveWeather: "+cityId+cityZh+condTxt);
+         }else {
+         db.update("WeatherDetail", values, "updateTime=? and condCode=? and condTxt=? and tmp=?", new String[]{updateTime, condCode, condTxt, tmp});
+         Log.d("update", "saveWeather: "+cityId+cityZh+condTxt);
+         }
          */
         db.replace("WeatherDetail", null, values);
 
     }
 
     public String[] readWeather(String cityId) {
-        String[] weatherData=new String[9];
+        String[] weatherData = new String[9];
         //Cursor cursor=db.query("WeatherDetail", null, cityId, null, null, null, null);
-        Cursor cursor = db.rawQuery("select * from WeatherDetail where _id='" + cityId+"'",null);
+        Cursor cursor = db.rawQuery("select * from WeatherDetail where _id='" + cityId + "'", null);
         if (cursor.moveToFirst()) {
             do {
                 weatherData[0] = cursor.getString(cursor.getColumnIndex("_id"));
@@ -143,9 +138,10 @@ public class WeatherDB {
             } while (cursor.moveToNext());
         }
         cursor.close();
-        Log.d("WeatherDB", "readWeather: "+ Arrays.toString(weatherData));
+        Log.d("WeatherDB", "readWeather: " + Arrays.toString(weatherData));
         return weatherData;
     }
+
     public Cursor query(String selection) {
         return db.rawQuery(selection, null);
     }

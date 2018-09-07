@@ -1,51 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
 
-    <include layout="@layout/tool_bar" />
+    <include layout="@layout/tool_bar"/>
+
     <AutoCompleteTextView
+        android:id="@+id/cityManual"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text=""
-        android:hint="输入城市名称"
+        android:completionThreshold="1"
         android:ems="10"
-        android:id="@+id/cityManual"
-        android:completionThreshold="1"/>
+        android:hint="输入城市名称"
+        android:text=""/>
 
     <Button
-        android:text="定位"
+        android:id="@+id/location"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/location" />
+        android:text="定位"/>
 
     <TextView
-        android:text="热门城市"
-        android:gravity="center"
+        android:id="@+id/textView2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/textView2" />
+        android:gravity="center"
+        android:text="热门城市"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <Button
+            android:id="@+id/xuzhou"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="徐州"
-            android:id="@+id/xuzhou"/>
+            android:text="徐州"/>
+
         <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:id="@+id/nanjing"
-            android:text="南京"/>
-        <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="北京"
-            android:id="@+id/beijing"/>
+            android:text="南京"/>
+
+        <Button
+            android:id="@+id/beijing"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="北京"/>
     </LinearLayout>
 
 

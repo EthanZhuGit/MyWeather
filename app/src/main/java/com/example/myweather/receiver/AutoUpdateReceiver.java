@@ -13,23 +13,24 @@ import com.example.myweather.db.WeatherDB;
  * Created by zyx10 on 2016/12/26 0026.
  */
 
-public class AutoUpdateReceiver extends BroadcastReceiver{
+public class AutoUpdateReceiver extends BroadcastReceiver {
     private static final String TAG = "AutoUpdateReceiver";
+
     @Override
     public void onReceive(Context context, Intent intent) {
         final WeatherDB weatherDB = WeatherDB.getInstance(context);
-        SharedPreferences sharedPreferences = context.getSharedPreferences("data",Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("data", Context.MODE_PRIVATE);
         int cityNum = sharedPreferences.getInt("city_num", 0);
-        for (int i=0; i<cityNum; i++) {
-            String s=sharedPreferences.getString("city"+i,"");
+        for (int i = 0; i < cityNum; i++) {
+            String s = sharedPreferences.getString("city" + i, "");
             String cityId = s.substring(1, 12);
             String cityName = s.substring(12);
             long intervalTime = intent.getLongExtra("interval", 0);
-            Log.d(TAG, "onReceive "+" "+cityId+" "+cityName+intervalTime);
+            Log.d(TAG, "onReceive " + " " + cityId + " " + cityName + intervalTime);
             GetWeatherDetail.requestWeather(cityId, new GetWeatherDetail.HttpCallBackListener() {
                 @Override
                 public void onFinish(String response) {
-                    GetWeatherDetail.handleWeatherResponse(weatherDB,response);
+                    GetWeatherDetail.handleWeatherResponse(weatherDB, response);
                 }
 
                 @Override

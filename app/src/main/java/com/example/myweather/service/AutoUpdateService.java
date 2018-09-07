@@ -16,6 +16,7 @@ import android.util.Log;
 
 public class AutoUpdateService extends Service {
     private static final String TAG = "AutoUpdateService";
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -43,13 +44,13 @@ public class AutoUpdateService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        long intervalTime= intent.getLongExtra("time",0);
-        Log.d(TAG, "onStartCommand: "+intervalTime);
+        long intervalTime = intent.getLongExtra("time", 0);
+        Log.d(TAG, "onStartCommand: " + intervalTime);
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         Intent intent1 = new Intent("UPDATE_BACKGROUND");
         intent1.putExtra("interval", intervalTime);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent1, 0);
-        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,SystemClock.elapsedRealtime(),intervalTime,pendingIntent);
+        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), intervalTime, pendingIntent);
         return super.onStartCommand(intent, flags, startId);
     }
 

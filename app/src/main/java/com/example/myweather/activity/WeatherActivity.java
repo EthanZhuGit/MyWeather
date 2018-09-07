@@ -51,21 +51,21 @@ import java.util.List;
 
 public class WeatherActivity extends BaseActivity {
     private static WeatherDB weatherDB = WeatherDB.getInstance(MyApplication.getContext());
-    private static List<City> cityList=new ArrayList<>();
+    private static List<City> cityList = new ArrayList<>();
     private static final String TAG = "WeatherActivity";
     private DrawerLayout drawer;
     private ViewPager viewPager;
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private CityAdapter cityAdapter;
-    private SharedPreferences sharedPreferences ;
+    private SharedPreferences sharedPreferences;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather_layout);
 
-        final long halfHour=10*1000;
-        final long oneHour=20*1000;
-        final long twoHour=30*1000;
+        final long halfHour = 10 * 1000;
+        final long oneHour = 20 * 1000;
+        final long twoHour = 30 * 1000;
 
         sharedPreferences = getSharedPreferences("data", MODE_PRIVATE);
 
@@ -77,41 +77,42 @@ public class WeatherActivity extends BaseActivity {
         final boolean isUpdateBackground = sharedPreferences.getBoolean("isUpdateBackground", false);
         Log.d(TAG, "onCreate: " + isUpdateBackground);
         String updateInterval = sharedPreferences.getString("updateInterval", "");
-        Log.d(TAG, "onCreate: "+updateInterval);
+        Log.d(TAG, "onCreate: " + updateInterval);
         if (isUpdateBackground) {
             long intervalTime;
             switch (updateInterval) {
                 case "half":
-                    intervalTime=halfHour;
+                    intervalTime = halfHour;
                     break;
                 case "one":
-                    intervalTime=oneHour;
+                    intervalTime = oneHour;
                     break;
                 case "two":
-                    intervalTime=twoHour;
+                    intervalTime = twoHour;
                     break;
                 default:
-                    intervalTime=halfHour;
-                    SharedPreferences.Editor editor=getSharedPreferences("data",MODE_PRIVATE).edit();
+                    intervalTime = halfHour;
+                    SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
                     editor.putString("updateInterval", "half");
                     editor.commit();
                     break;
             }
-            AutoUpdateService.startService(WeatherActivity.this,intervalTime);
-            Log.d(TAG, "onCreate: "+"service start"+intervalTime);
+            AutoUpdateService.startService(WeatherActivity.this, intervalTime);
+            Log.d(TAG, "onCreate: " + "service start" + intervalTime);
         }
 
         toolBar.setTitle("");
         setSupportActionBar(toolBar);
-        if(getSupportActionBar()!=null) {
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setHomeButtonEnabled(true);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        final ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawer,toolBar,R.string.drawer_open,R.string.drawer_close){
+        final ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawer, toolBar, R.string.drawer_open, R.string.drawer_close) {
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
             }
+
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
@@ -123,29 +124,29 @@ public class WeatherActivity extends BaseActivity {
         weatherDB = WeatherDB.getInstance(MyApplication.getContext());
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        viewPager= (ViewPager) findViewById(R.id.container);
+        viewPager = (ViewPager) findViewById(R.id.container);
         viewPager.setAdapter(mSectionsPagerAdapter);
 
 
-        Intent intent=getIntent();
+        Intent intent = getIntent();
         String cityId = intent.getStringExtra("city_id");
         String cityName = intent.getStringExtra("city_name");
-        Log.d(TAG, "onCreate: "+cityId);
+        Log.d(TAG, "onCreate: " + cityId);
 
-        if (cityId==null){
-            int pageNum=0;
+        if (cityId == null) {
+            int pageNum = 0;
 
             int cityNum = sharedPreferences.getInt("city_num", 0);
-            for (int i=0; i<cityNum; i++) {
-                String s=sharedPreferences.getString("city"+i,"");
+            for (int i = 0; i < cityNum; i++) {
+                String s = sharedPreferences.getString("city" + i, "");
                 cityId = s.substring(1, 12);
-                cityName=s.substring(12);
-                boolean isDefault=s.substring(0,1).equals("1");
+                cityName = s.substring(12);
+                boolean isDefault = s.substring(0, 1).equals("1");
                 if (isDefault) {
-                    pageNum=i;
+                    pageNum = i;
                 }
-                City city = new City(cityId,cityName,isDefault);
-                Log.d(TAG, "onCreate: "+" "+cityId+" "+cityName);
+                City city = new City(cityId, cityName, isDefault);
+                Log.d(TAG, "onCreate: " + " " + cityId + " " + cityName);
                 if (!cityList.contains(city)) {
                     cityList.add(city);
 
@@ -155,10 +156,10 @@ public class WeatherActivity extends BaseActivity {
                 }
             }
             viewPager.setCurrentItem(pageNum);
-        }else {
-            City city = new City(cityId, cityName,false);
-            Log.d(TAG, "onCreate: "+cityId+" "+cityName);
-            if(!cityList.contains(city)) {
+        } else {
+            City city = new City(cityId, cityName, false);
+            Log.d(TAG, "onCreate: " + cityId + " " + cityName);
+            if (!cityList.contains(city)) {
                 cityList.add(city);
 
                 getWeather(cityId);
@@ -170,7 +171,7 @@ public class WeatherActivity extends BaseActivity {
         }
 
 
-        ListView list= (ListView)drawer.findViewById(R.id.city_list);
+        ListView list = (ListView) drawer.findViewById(R.id.city_list);
         cityAdapter = new CityAdapter(this, R.layout.city_list_item, cityList);
         list.setAdapter(cityAdapter);
 
@@ -184,7 +185,40 @@ public class WeatherActivity extends BaseActivity {
         list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-                    if (cityList.size() == 1) {
+                if (cityList.size() == 1) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(WeatherActivity.this);
+                    builder.setTitle("Notice");
+                    builder.setMessage("是否删除" + " " + cityList.get(position).getCityName());
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            cityList.remove(position);
+                            cityAdapter.notifyDataSetChanged();
+                            mSectionsPagerAdapter.notifyDataSetChanged();
+                            Log.d(TAG, "onItemLongClick: " + "size=1");
+                            Intent intent = new Intent(WeatherActivity.this, ChooseCityActivity.class);
+                            startActivity(intent);
+                        }
+                    });
+                    builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    });
+                    builder.create().show();
+                } else {
+                    if (cityList.get(position).getIsDefault()) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(WeatherActivity.this);
+                        builder.setTitle("Notice");
+                        builder.setMessage("无法删除默认城市");
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        });
+                        builder.create().show();
+                    } else {
                         AlertDialog.Builder builder = new AlertDialog.Builder(WeatherActivity.this);
                         builder.setTitle("Notice");
                         builder.setMessage("是否删除" + " " + cityList.get(position).getCityName());
@@ -194,9 +228,12 @@ public class WeatherActivity extends BaseActivity {
                                 cityList.remove(position);
                                 cityAdapter.notifyDataSetChanged();
                                 mSectionsPagerAdapter.notifyDataSetChanged();
-                                Log.d(TAG, "onItemLongClick: " + "size=1");
-                                Intent intent = new Intent(WeatherActivity.this, ChooseCityActivity.class);
-                                startActivity(intent);
+                                Log.d(TAG, "onItemLongClick: " + "size大于1" + cityList.size());
+                                if (cityList.size() == position + 1) {
+                                    viewPager.setCurrentItem(position - 1);
+                                } else {
+                                    viewPager.setCurrentItem(position);
+                                }
                             }
                         });
                         builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
@@ -205,45 +242,8 @@ public class WeatherActivity extends BaseActivity {
                             }
                         });
                         builder.create().show();
-                    } else {
-                        if(cityList.get(position).getIsDefault())
-                        {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(WeatherActivity.this);
-                            builder.setTitle("Notice");
-                            builder.setMessage("无法删除默认城市");
-                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-
-                                }
-                            });
-                            builder.create().show();
-                        }else {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(WeatherActivity.this);
-                            builder.setTitle("Notice");
-                            builder.setMessage("是否删除" + " " + cityList.get(position).getCityName());
-                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    cityList.remove(position);
-                                    cityAdapter.notifyDataSetChanged();
-                                    mSectionsPagerAdapter.notifyDataSetChanged();
-                                    Log.d(TAG, "onItemLongClick: " + "size大于1" + cityList.size());
-                                    if (cityList.size() == position + 1) {
-                                        viewPager.setCurrentItem(position - 1);
-                                    } else {
-                                        viewPager.setCurrentItem(position);
-                                    }
-                                }
-                            });
-                            builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                }
-                            });
-                            builder.create().show();
-                        }
                     }
+                }
 
                 return true;
             }
@@ -253,15 +253,15 @@ public class WeatherActivity extends BaseActivity {
         set.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: "+"set");
-                LinearLayout linearLayout=(LinearLayout) LayoutInflater.
-                        from(WeatherActivity.this).inflate(R.layout.pop_up_window,null,false);
+                Log.d(TAG, "onClick: " + "set");
+                LinearLayout linearLayout = (LinearLayout) LayoutInflater.
+                        from(WeatherActivity.this).inflate(R.layout.pop_up_window, null, false);
                 PopupWindow popupWindow = new PopupWindow(linearLayout,
-                        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT,true);
+                        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, true);
                 popupWindow.setBackgroundDrawable(new BitmapDrawable());
                 popupWindow.showAsDropDown(set);
                 popupWindow.update();
-                final Switch updateBackground = (Switch)linearLayout.findViewById(R.id.update_background);
+                final Switch updateBackground = (Switch) linearLayout.findViewById(R.id.update_background);
                 final RadioGroup interval = (RadioGroup) linearLayout.findViewById(R.id.interval);
                 SharedPreferences sharedPreferences = getSharedPreferences("data", MODE_PRIVATE);
                 boolean isUpdateBackground = sharedPreferences.getBoolean("isUpdateBackground", false);
@@ -325,7 +325,7 @@ public class WeatherActivity extends BaseActivity {
                 updateBackground.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        Log.d(TAG, "onCheckedChanged: "+"updateBackground");
+                        Log.d(TAG, "onCheckedChanged: " + "updateBackground");
                         SharedPreferences sharedPreferences = getSharedPreferences("data", MODE_PRIVATE);
                         if (isChecked) {
                             interval.setVisibility(View.VISIBLE);
@@ -396,7 +396,7 @@ public class WeatherActivity extends BaseActivity {
                         } else {
                             interval.setVisibility(View.GONE);
                             AutoUpdateService.stopService(WeatherActivity.this);
-                            Log.d(TAG, "onCheckedChanged: "+"Service stop");
+                            Log.d(TAG, "onCheckedChanged: " + "Service stop");
                             SharedPreferences.Editor e = getSharedPreferences("data", MODE_PRIVATE).edit();
                             e.putBoolean("isUpdateBackground", isChecked);
                             e.commit();
@@ -406,7 +406,7 @@ public class WeatherActivity extends BaseActivity {
             }
         });
 
-        Button addCity= (Button) findViewById(R.id.drawer_add_city);
+        Button addCity = (Button) findViewById(R.id.drawer_add_city);
         addCity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -438,24 +438,22 @@ public class WeatherActivity extends BaseActivity {
         });
 
 
-
     }
 
 
-
-    public static void actionStart(Context context, String cityId,String cityName) {
+    public static void actionStart(Context context, String cityId, String cityName) {
         Intent intent = new Intent(context, WeatherActivity.class);
         intent.putExtra("city_id", cityId);
         intent.putExtra("city_name", cityName);
         context.startActivity(intent);
-        ((AppCompatActivity)context).finish();
+        ((AppCompatActivity) context).finish();
     }
 
     private void getWeather(String cityId) {
         GetWeatherDetail.requestWeather(cityId, new GetWeatherDetail.HttpCallBackListener() {
             @Override
             public void onFinish(String response) {
-                GetWeatherDetail.handleWeatherResponse(weatherDB,response);
+                GetWeatherDetail.handleWeatherResponse(weatherDB, response);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -570,7 +568,7 @@ public class WeatherActivity extends BaseActivity {
          */
         public static PlaceholderFragment newInstance(int sectionNumber) {
             PlaceholderFragment fragment = new PlaceholderFragment();
-            Log.d(TAG, "newInstance: "+cityList.get(sectionNumber-1).getCityId()+"    "+ sectionNumber);
+            Log.d(TAG, "newInstance: " + cityList.get(sectionNumber - 1).getCityId() + "    " + sectionNumber);
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
@@ -581,26 +579,26 @@ public class WeatherActivity extends BaseActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView =  inflater.inflate(R.layout.fragment_main, container, false);
-            String id=cityList.get(getArguments().getInt(ARG_SECTION_NUMBER)-1).getCityId();
-            Log.d(TAG, "onCreateView: "+id+"    "+getArguments().getInt(ARG_SECTION_NUMBER));
+            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            String id = cityList.get(getArguments().getInt(ARG_SECTION_NUMBER) - 1).getCityId();
+            Log.d(TAG, "onCreateView: " + id + "    " + getArguments().getInt(ARG_SECTION_NUMBER));
             String[] weatherData = weatherDB.readWeather(id);
-            TextView weatherTxt= (TextView) rootView.findViewById(R.id.weather_txt);
+            TextView weatherTxt = (TextView) rootView.findViewById(R.id.weather_txt);
             weatherTxt.setText(weatherData[4]);
-            ImageView weatherIcon= (ImageView)rootView.findViewById(R.id.weather_icon);
+            ImageView weatherIcon = (ImageView) rootView.findViewById(R.id.weather_icon);
             weatherIcon.setImageResource(
                     getResources().
-                            getIdentifier("a"+weatherData[3],"drawable",getContext().getPackageName()));
-            TextView tmpFeel= (TextView) rootView.findViewById(R.id.tmp_feel);
-            tmpFeel.setText(weatherData[6]+" "+"℃");
-            TextView tmpReal= (TextView) rootView.findViewById(R.id.tmp_real);
-            tmpReal.setText(weatherData[5]+" "+"℃");
-            TextView windDir= (TextView) rootView.findViewById(R.id.wind_dir);
+                            getIdentifier("a" + weatherData[3], "drawable", getContext().getPackageName()));
+            TextView tmpFeel = (TextView) rootView.findViewById(R.id.tmp_feel);
+            tmpFeel.setText(weatherData[6] + " " + "℃");
+            TextView tmpReal = (TextView) rootView.findViewById(R.id.tmp_real);
+            tmpReal.setText(weatherData[5] + " " + "℃");
+            TextView windDir = (TextView) rootView.findViewById(R.id.wind_dir);
             windDir.setText(weatherData[7]);
-            TextView windSc= (TextView) rootView.findViewById(R.id.wind_sc);
-            windSc.setText(weatherData[8]+"级");
-            TextView updateTime= (TextView)rootView.findViewById(R.id.update_time);
-            updateTime.setText("发布时间 "+weatherData[2]);
+            TextView windSc = (TextView) rootView.findViewById(R.id.wind_sc);
+            windSc.setText(weatherData[8] + "级");
+            TextView updateTime = (TextView) rootView.findViewById(R.id.update_time);
+            updateTime.setText("发布时间 " + weatherData[2]);
             return rootView;
         }
 
@@ -608,13 +606,14 @@ public class WeatherActivity extends BaseActivity {
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
         int currentPosition;
+
         public SectionsPagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
         }
 
         @Override
-        public Fragment getItem(int position) { 
-            return PlaceholderFragment.newInstance(position+1);
+        public Fragment getItem(int position) {
+            return PlaceholderFragment.newInstance(position + 1);
         }
 
         @Override
@@ -635,37 +634,37 @@ public class WeatherActivity extends BaseActivity {
 
         @Override
         public void setPrimaryItem(ViewGroup container, int position, Object object) {
-            currentPosition=position;
+            currentPosition = position;
             super.setPrimaryItem(container, position, object);
         }
     }
 
-    public class CityAdapter extends ArrayAdapter<City>{
+    public class CityAdapter extends ArrayAdapter<City> {
         private int resourceId;
 
         public CityAdapter(Context context, int textViewResourceId, List<City> objects) {
             super(context, textViewResourceId, objects);
-            resourceId=textViewResourceId;
+            resourceId = textViewResourceId;
         }
 
         @NonNull
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
-            final City city=getItem(position);
+            final City city = getItem(position);
             //final City city = cityList.get(position);
             View view;
             if (convertView == null) {
                 view = LayoutInflater.from(getContext()).inflate(resourceId, null);
             } else {
-                view=convertView;
+                view = convertView;
             }
-            TextView cityName= (TextView) view.findViewById(R.id.drawer_listview_city_name);
-            final Button setDefault= (Button)view.findViewById(R.id.set_default);
-            if(city!=null) {
+            TextView cityName = (TextView) view.findViewById(R.id.drawer_listview_city_name);
+            final Button setDefault = (Button) view.findViewById(R.id.set_default);
+            if (city != null) {
                 cityName.setText(city.getCityName());
-                if (cityList.size()==1){
+                if (cityList.size() == 1) {
                     setDefault.setVisibility(View.INVISIBLE);
-                }else {
+                } else {
                     setDefault.setEnabled(true);
                     setDefault.setText("设为默认");
                     if (city.getIsDefault()) {
@@ -697,12 +696,12 @@ public class WeatherActivity extends BaseActivity {
     protected void onPause() {
         super.onPause();
         Log.d(TAG, "onPause: ");
-        SharedPreferences.Editor editor=getSharedPreferences("data",MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
         editor.putInt("city_num", cityList.size());
-        for (int i=0; i<cityList.size(); i++) {
+        for (int i = 0; i < cityList.size(); i++) {
             if (cityList.get(i).getIsDefault()) {
                 editor.putString("city" + i, "1" + cityList.get(i).getCityId() + cityList.get(i).getCityName());
-            }else {
+            } else {
                 editor.putString("city" + i, "0" + cityList.get(i).getCityId() + cityList.get(i).getCityName());
             }
         }
@@ -731,9 +730,9 @@ public class WeatherActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         Log.d(TAG, "onBackPressed: ");
-        if(drawer.isDrawerOpen(findViewById(R.id.left_drawer))){
+        if (drawer.isDrawerOpen(findViewById(R.id.left_drawer))) {
             drawer.closeDrawers();
-        }else {
+        } else {
             ActivityCollector.finishAll();
         }
 

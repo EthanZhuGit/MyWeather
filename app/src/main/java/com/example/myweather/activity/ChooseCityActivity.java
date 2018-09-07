@@ -27,12 +27,14 @@ import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.example.myweather.R;
 import com.example.myweather.db.WeatherDB;
+
 import java.util.ArrayList;
+
 /**
  * Created by zyx10 on 2016/11/27 0027.
  */
 
-public class ChooseCityActivity extends BaseActivity implements View.OnClickListener{
+public class ChooseCityActivity extends BaseActivity implements View.OnClickListener {
     private Button locate;
     private Button xuzhou;
     private Button nanjing;
@@ -50,8 +52,8 @@ public class ChooseCityActivity extends BaseActivity implements View.OnClickList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate: "+"before");
-        Intent intent=getIntent();
+        Log.d(TAG, "onCreate: " + "before");
+        Intent intent = getIntent();
         isFromWeatherActivity = intent.getBooleanExtra("isFromWeatherActivity", false);
         if (!isFromWeatherActivity) {
             SharedPreferences preferences = getSharedPreferences("data", MODE_PRIVATE);
@@ -63,7 +65,7 @@ public class ChooseCityActivity extends BaseActivity implements View.OnClickList
             }
         }
         setContentView(R.layout.choose_city_layout);
-        Log.d(TAG, "onCreate: "+"after");
+        Log.d(TAG, "onCreate: " + "after");
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         TextView toolBarTitle = (TextView) findViewById(R.id.toolbar_title);
         toolbar.setTitle("");
@@ -72,10 +74,10 @@ public class ChooseCityActivity extends BaseActivity implements View.OnClickList
         weatherDB = WeatherDB.getInstance(this);
 
 
-        locate= (Button) findViewById(R.id.location);
-        xuzhou= (Button) findViewById(R.id.xuzhou);
-        nanjing= (Button) findViewById(R.id.nanjing);
-        beijing= (Button) findViewById(R.id.beijing);
+        locate = (Button) findViewById(R.id.location);
+        xuzhou = (Button) findViewById(R.id.xuzhou);
+        nanjing = (Button) findViewById(R.id.nanjing);
+        beijing = (Button) findViewById(R.id.beijing);
         getPermissions();//获取运行时权限
         client = new LocationClient(getApplicationContext());//定位
         client.registerLocationListener(mListener);
@@ -86,17 +88,16 @@ public class ChooseCityActivity extends BaseActivity implements View.OnClickList
         beijing.setOnClickListener(this);
 
         //cursorAdapter实现的自动填充搜索框
-        autoCompleteTextView= (AutoCompleteTextView) findViewById(R.id.cityManual);
-        MyCursorAdapter adapter = new MyCursorAdapter(this, null,true);
+        autoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.cityManual);
+        MyCursorAdapter adapter = new MyCursorAdapter(this, null, true);
         autoCompleteTextView.setAdapter(adapter);
         autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String s=view.getTag().toString();
-                WeatherActivity.actionStart(ChooseCityActivity.this,s.substring(0,11),s.substring(11));
+                String s = view.getTag().toString();
+                WeatherActivity.actionStart(ChooseCityActivity.this, s.substring(0, 11), s.substring(11));
             }
         });
-
 
 
     }
@@ -104,14 +105,14 @@ public class ChooseCityActivity extends BaseActivity implements View.OnClickList
     class MyCursorAdapter extends CursorAdapter {
         private LayoutInflater inflater;
 
-        public MyCursorAdapter(Context context, Cursor c,boolean autoRequrey) {
-            super(context, c,autoRequrey);
+        public MyCursorAdapter(Context context, Cursor c, boolean autoRequrey) {
+            super(context, c, autoRequrey);
             // TODO Auto-generated constructor stub
         }
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            String s = cursor.getString(cursor.getColumnIndex("cityZh"))+"-"+cursor.getString(cursor.getColumnIndex("provinceZh"));
+            String s = cursor.getString(cursor.getColumnIndex("cityZh")) + "-" + cursor.getString(cursor.getColumnIndex("provinceZh"));
             String idAndName = cursor.getString(cursor.getColumnIndex("_id")) + cursor.getString(cursor.getColumnIndex("cityZh"));
             view.setTag(idAndName);
 
@@ -121,14 +122,14 @@ public class ChooseCityActivity extends BaseActivity implements View.OnClickList
         @Override
         public View newView(Context context, Cursor cursor, ViewGroup parent) {
             inflater = LayoutInflater.from(context);
-            return  inflater.inflate(android.R.layout.simple_dropdown_item_1line, parent, false);
+            return inflater.inflate(android.R.layout.simple_dropdown_item_1line, parent, false);
 
         }
 
         @Override
         public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
             if (constraint != null) {
-                String selection="select * from City where cityZh like '%"+constraint.toString()+"%'";
+                String selection = "select * from City where cityZh like '%" + constraint.toString() + "%'";
                 return weatherDB.query(selection);
             } else {
                 return null;
@@ -137,50 +138,48 @@ public class ChooseCityActivity extends BaseActivity implements View.OnClickList
     }
 
 
-
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.location:
                 client.start();
-                new Handler().postDelayed(new Runnable(){
+                new Handler().postDelayed(new Runnable() {
                     public void run() {
                         //execute the task
                         if (CITY_NAME == null) {
                             locate.setText("定位失败，点击重试");
-                        }else {
-                            Log.d(TAG, "run: "+CITY_NAME);
-                            Cursor c= weatherDB.query("select * from City where cityZh like '%"+CITY_NAME.substring(0,2)+"%'");
+                        } else {
+                            Log.d(TAG, "run: " + CITY_NAME);
+                            Cursor c = weatherDB.query("select * from City where cityZh like '%" + CITY_NAME.substring(0, 2) + "%'");
                             if (c.moveToFirst()) {
                                 CITY_ID = c.getString(c.getColumnIndex("_id"));
                                 CITY_NAME = c.getString(c.getColumnIndex("cityZh"));
-                                Log.d(TAG, "run: "+CITY_ID);
+                                Log.d(TAG, "run: " + CITY_ID);
                             }
                             c.close();
-                            locate.setText("定位成功"+" "+CITY_NAME);
-                            WeatherActivity.actionStart(ChooseCityActivity.this,CITY_ID,CITY_NAME);
+                            locate.setText("定位成功" + " " + CITY_NAME);
+                            WeatherActivity.actionStart(ChooseCityActivity.this, CITY_ID, CITY_NAME);
 
                         }
                     }
                 }, 1000);
                 break;
             case R.id.xuzhou:
-                CITY_ID="CN101190801";
-                WeatherActivity.actionStart(ChooseCityActivity.this,CITY_ID,"徐州");
+                CITY_ID = "CN101190801";
+                WeatherActivity.actionStart(ChooseCityActivity.this, CITY_ID, "徐州");
                 break;
             case R.id.nanjing:
                 CITY_ID = "CN101190101";
-                WeatherActivity.actionStart(ChooseCityActivity.this,CITY_ID,"南京");
+                WeatherActivity.actionStart(ChooseCityActivity.this, CITY_ID, "南京");
                 break;
             case R.id.beijing:
                 CITY_ID = "CN101010100";
-                WeatherActivity.actionStart(ChooseCityActivity.this,CITY_ID,"北京");
+                WeatherActivity.actionStart(ChooseCityActivity.this, CITY_ID, "北京");
                 break;
         }
 
     }
-    
-    
+
 
     @Override
     protected void onStop() {
@@ -208,10 +207,10 @@ public class ChooseCityActivity extends BaseActivity implements View.OnClickList
     }
 
     private void initLocation() {
-        LocationClientOption option=new LocationClientOption();
+        LocationClientOption option = new LocationClientOption();
         option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
         option.setCoorType("bd09ll");
-        int span=1000;
+        int span = 1000;
         option.setScanSpan(span);
         option.setIsNeedAddress(true);
         option.setLocationNotify(true);//可选，默认false，设置是否当GPS有效时按照1S/1次频率输出GPS结果
@@ -231,12 +230,11 @@ public class ChooseCityActivity extends BaseActivity implements View.OnClickList
             // TODO Auto-generated method stub
             if (null != location && location.getLocType() != BDLocation.TypeServerError) {
 
-                CITY_NAME=location.getCity();
+                CITY_NAME = location.getCity();
             }
         }
 
     };
-
 
 
     @TargetApi(23)
@@ -247,15 +245,15 @@ public class ChooseCityActivity extends BaseActivity implements View.OnClickList
              * 定位权限为必须权限，用户如果禁止，则每次进入都会申请
              */
             // 定位精确位置
-            if(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
             }
-            if(checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
             }
-			/*
-			 * 读写权限和电话状态权限非必要权限(建议授予)只会申请一次，用户同意或者禁止，只会弹一次
-			 */
+            /*
+             * 读写权限和电话状态权限非必要权限(建议授予)只会申请一次，用户同意或者禁止，只会弹一次
+             */
             // 读写权限
             if (addPermission(permissions, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 permissionInfo += "Manifest.permission.WRITE_EXTERNAL_STORAGE Deny \n";
@@ -272,20 +270,17 @@ public class ChooseCityActivity extends BaseActivity implements View.OnClickList
     }
 
 
-
-
-
     @TargetApi(23)
     private boolean addPermission(ArrayList<String> permissionsList, String permission) {
         if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) { // 如果应用没有获得对应权限,则添加到列表中,准备批量申请
-            if (shouldShowRequestPermissionRationale(permission)){
+            if (shouldShowRequestPermissionRationale(permission)) {
                 return true;
-            }else{
+            } else {
                 permissionsList.add(permission);
                 return false;
             }
 
-        }else{
+        } else {
             return true;
         }
     }
